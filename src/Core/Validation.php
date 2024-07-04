@@ -37,6 +37,11 @@ class Validation {
     {
         return $this->error;
     }
+    
+    public function validatedData()
+    {
+        return $this->data;
+    }
 
     private function validate()
     {

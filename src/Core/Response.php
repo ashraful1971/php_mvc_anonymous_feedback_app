@@ -7,12 +7,14 @@ class Response {
     {
         header('Content-Type: application/json');
         echo json_encode($data);
+        exit;
     }
     
     public static function view($file, $data=[])
     {
         header('Content-Type: text/html');
         require_once VIEW_PATH.'/'.$file.'.php';
+        exit;
     }
     
     public static function redirect($url)

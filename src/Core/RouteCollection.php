@@ -10,8 +10,8 @@ class RouteCollection {
         $this->routes = $routes;
     }
 
-    public function find($method, $endpoint): Route
+    public function find($method, $endpoint): Route|null
     {
-        return $this->routes[$method][$endpoint];
+        return isset($this->routes[$method][$endpoint]) ? $this->routes[$method][$endpoint] : null;
     }
 }

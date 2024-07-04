@@ -6,17 +6,15 @@ use App\Core\Contracts\DataStorage;
 
 class LocalStorage implements DataStorage {
 
-    private $data = [];
     private static $instance = null;
     private static $file;
 
     /**
-     * Fetch the data
+     * Set the db file path and name
      */
     public function __construct($db_file)
     {
         self::$file = $db_file;
-        $this->fetchData();
     }
 
     /**
@@ -34,26 +32,31 @@ class LocalStorage implements DataStorage {
     }
 
     /**
-     * Fetch and initialize the data
+     * Fetch data
      *
-     * @return void
+     * @return array
      */
-    public function fetchData(): void
+    public function fetchData(): array
     {
+        $data = [];
+
         if(file_exists(self::$file)){
-            $this->data = json_decode(file_get_contents(self::$file), true);
+            $data = json_decode(file_get_contents(self::$file), true);
         }
+
+        return $data;
     }
 
     /**
      * Get all the records
      *
-     * @param string $name
+     * @param string $table_name
      * @return array
      */
     public function getAllRecords(string $table_name): array
     {
-        return isset($this->data[$table_name]) ? $this->data[$table_name] : [];
+        $data = $this->fetchData();
+        return isset($data[$table_name]) ? $data[$table_name] : [];
     }
 
     /**
@@ -61,22 +64,25 @@ class LocalStorage implements DataStorage {
      *
      * @param string $table_name
      * @param array $data
-     * @return self
+     * @return bool
      */
-    public function addNewRecord(string $table_name, array $data): self
+    public function addNewRecord(string $table_name, array $data): bool
     {
-        $this->data[$table_name][] = $data;
-        return $this;
+        $data = $this->fetchData();
+        $data[$table_name][] = $data;
+        
+        return $this->save($data);
     }
 
     /**
      * Save the data to the storage
      *
+     * @param array $data
      * @return boolean
      */
-    public function save(): bool
+    private function save($data): bool
     {
-        file_put_contents(self::$file, json_encode($this->data), JSON_PRETTY_PRINT);
+        file_put_contents(self::$file, json_encode($data), JSON_PRETTY_PRINT);
 
         return true;
     }

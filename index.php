@@ -10,6 +10,6 @@ require_once 'src/Routes/web.php';
 
 // run app
 App\Core\Application::init()
-    ->withRoutes(App\Core\Route::collection())    
+    ->withRoutes(App\Core\Route::collection())
     ->run(new App\Core\Request());
 

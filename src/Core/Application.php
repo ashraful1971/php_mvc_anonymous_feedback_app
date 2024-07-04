@@ -8,7 +8,6 @@ class Application
 {
     private static $app;
     private RouteCollection $routes;
-    private $middlewares;
     private $request;
 
     public static function init(): Application
@@ -33,28 +32,35 @@ class Application
         return $this;
     }
 
-    public function withMiddlewares($middlewares)
-    {
-        return $this->middlewares = $middlewares;
-    }
-
     private function handleRequest()
     {
         $method = $this->request->getMethod();
         $endpoint = $this->request->getRoutePath();
-        $action = $this->getAction($method, $endpoint);
-        $this->resolveAction($action);
+        $route = $this->findRoute($method, $endpoint);
+
+        if(!$route){
+            Response::redirect('/404');
+        }
+
+        $middlewares = $route->getMiddlewares();
+        
+        if($middlewares){
+            $this->applyMiddlewares($middlewares);
+        }
+
+        return $this->resolveAction($route->getAction());
     }
 
     private function findRoute($method, $endpoint)
     {
         return $this->routes->find($method, $endpoint);
     }
-
-    private function getAction($method, $endpoint)
+    
+    private function applyMiddlewares($middlewares)
     {
-        $route = $this->findRoute($method, $endpoint);
-        return $route->getAction();
+        foreach($middlewares as $middleware){
+            $middleware::handle($this->request);
+        }
     }
 
     private function resolveAction($action)

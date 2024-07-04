@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use App\Core\Contracts\DataStorage;
+use App\Core\LocalStorage;
 
 class Model {
     protected $table_name;
@@ -18,8 +19,8 @@ class Model {
 
     public function __get($name)
     {
-        if($value = isset($this->attributes[$name])){
-            return $value;
+        if(isset($this->attributes[$name])){
+            return $this->attributes[$name];
         }
 
         return null;
@@ -35,7 +36,14 @@ class Model {
         $instance = new static();
         $records = $instance->storage->getAllRecords($instance->table_name);
 
-        return $records;
+        $collection = [];
+        if($records){
+            foreach($records as $record){
+                $collection[] = new static($record);
+            }
+        }
+
+        return $collection;
     }
     
     public static function find($column_name, $value)
@@ -47,7 +55,7 @@ class Model {
         }
 
         foreach($records as $record){
-            if(isset($record[$column_name]) && $record[$column_name] == $value){
+            if($record->$column_name == $value){
                 return $record;
             }
         }
@@ -56,18 +64,38 @@ class Model {
 
     }
     
+    public static function findAll($column_name, $value)
+    {
+        $records = self::all();
+
+        if(!$records){
+            return null;
+        }
+
+        $filteredRecords = [];
+
+        foreach($records as $record){
+            if($record->$column_name == $value){
+                $filteredRecords[] = $record;
+            }
+        }
+
+        return $filteredRecords;
+
+    }
+    
     public static function create(array $data)
     {
         $instance = new static($data);
         $instance->save();
 
-        return $data;
+        return $instance;
     }
     
     private function save()
     {
         $data = $this->getStoreableData();
-        $this->storage->addNewRecord($this->table_name, $data)->save();
+        return $this->storage->addNewRecord($this->table_name, $data);
     }
 
     private function getStoreableData()

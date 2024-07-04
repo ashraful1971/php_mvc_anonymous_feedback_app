@@ -22,7 +22,7 @@
                                 <span class="font-medium">Error!</span> <?php __($msg)?>
                             </div>
                         <?php endif ?>
-                        <form class="space-y-6" action="#" method="POST">
+                        <form class="space-y-6" action="<?php __(url('/login')) ?>" method="POST">
                             <div>
                                 <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
                                 <div class="mt-2">

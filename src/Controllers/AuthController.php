@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validation;
@@ -14,10 +15,31 @@ class AuthController {
         return Response::view('login');
     }
     
-    public function handleLogin()
+    public function handleLogin(Request $request)
     {
-        flash_message('success', 'How are you?');
-        return Response::redirect('/login');
+        // validation
+        $validation = Validation::make($request->all(), [
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if($validation->failed()){
+            flash_message('error', $validation->getMessage());
+            return Response::redirect('/login');
+        }
+
+        if(!$user = User::find('email', $request->email)){
+            flash_message('error', 'Invalid credentials!');
+            return Response::redirect('/login');
+        }
+
+        if(!password_verify($request->password, $user->password)){
+            flash_message('error', 'Invalid credentials!');
+            return Response::redirect('/login');
+        }
+
+        Auth::login($user);
+        return Response::redirect('/dashboard');
     }
 
     public function registerPage()
@@ -51,6 +73,13 @@ class AuthController {
             flash_message('success', 'Your account was created successfully!');
         }
 
+        return Response::redirect('/login');
+    }
+
+    public function handleLogout()
+    {
+        Auth::logout();
+        
         return Response::redirect('/login');
     }
 }
