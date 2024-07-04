@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validation;
@@ -11,30 +10,89 @@ use App\Models\User;
 
 class PageController
 {
-    public function index()
+    /**
+     * Get home page view
+     *
+     * @return mixed
+     */
+    public function index(): mixed
     {
         return Response::view('home');
     }
 
-    public function dashboard(Request $request)
+    /**
+     * Get dashboard page view
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function dashboard(Request $request): mixed
     {
-        if (!Auth::isAuthenticated()) {
-            return Response::redirect('/login');
-        }
-
         $feedbacks = Feedback::findAll('user_id', $request->user->id);
         return Response::view('dashboard', ['feedbacks' => $feedbacks]);
     }
 
-    public function feedback(Request $request)
+    /**
+     * Get feedback page view
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function feedback(Request $request): mixed
     {
         $user = User::find('id', $request->id);
+
+        if(!$user){
+            return Response::redirect('/404');
+        }
+
         return Response::view('feedback', ['user' => $user]);
     }
 
-    public function handleFeedback(Request $request)
+    /**
+     * Store new feedback
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function handleFeedback(Request $request): mixed
     {
-        $validation = Validation::make($request->all(), [
+        $data = $this->validatedFeedbackData($request->all());
+
+        Feedback::create($data);
+
+        return Response::redirect('/feedback-success');
+    }
+
+    /**
+     * Get feedback success page view
+     *
+     * @return mixed
+     */
+    public function feedbackSuccess(): mixed
+    {
+        return Response::view('feedback-success');
+    }
+
+    /**
+     * Get 404 page view
+     *
+     * @return mixed
+     */
+    public function pageNotFound(): mixed
+    {
+        return Response::view('404');
+    }
+    
+    /**
+     * Validate and return the validated feedback data
+     *
+     * @param array $data
+     * @return mixed
+     */
+    private function validatedFeedbackData(array $data): mixed
+    {
+        $validation = Validation::make($data, [
             'user_id' => ['required'],
             'feedback' => ['required'],
         ]);
@@ -44,18 +102,6 @@ class PageController
             return Response::redirect('/');
         }
 
-        Feedback::create($validation->validatedData());
-
-        return Response::redirect('/feedback-success');
-    }
-
-    public function feedbackSuccess()
-    {
-        return Response::view('feedback-success');
-    }
-    
-    public function pageNotFound()
-    {
-        return Response::view('404');
+        return $validation->validatedData();
     }
 }

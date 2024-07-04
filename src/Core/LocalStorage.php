@@ -68,10 +68,10 @@ class LocalStorage implements DataStorage {
      */
     public function addNewRecord(string $table_name, array $data): bool
     {
-        $data = $this->fetchData();
-        $data[$table_name][] = $data;
+        $oldData = $this->fetchData();
+        $oldData[$table_name][] = $data;
         
-        return $this->save($data);
+        return $this->save($oldData);
     }
 
     /**
