@@ -9,6 +9,7 @@ class Request {
     public function __construct()
     {
         $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
+        $this->attributes = array_merge($this->attributes, $_POST, $_GET);
     }
 
     public function __get($name)
@@ -56,6 +57,6 @@ class Request {
     
     public function all()
     {
-        return $this->getMethod() === 'POST' ? $_POST : $_GET;
+        return $this->attributes;
     }
 }

@@ -49,3 +49,9 @@ function url($endpoint, $params = []) {
 
     return $value;
   }
+
+  function generateUniqueId(): string {
+    $prefix = substr(md5(uniqid(mt_rand(), true)), 0, 5);
+    $suffix = random_int(100000, 999999);
+    return $prefix . $suffix;
+  }

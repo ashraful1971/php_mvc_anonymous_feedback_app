@@ -62,6 +62,9 @@ class Validation {
             case 'email':
                 $this->isEmail($key);
                 break;
+            case 'confirm':
+                $this->isConfirmed($key);
+                break;
             default:
                 break;
         }
@@ -88,6 +91,24 @@ class Validation {
         if(!filter_var($this->data[$key], FILTER_VALIDATE_EMAIL)){
             $this->isValid = false;
             $this->error = "$key is not a valid email!";
+        }
+    }
+    
+    private function isConfirmed(string $key)
+    {
+        if(empty($this->data[$key])){
+            $this->isValid = false;
+            $this->error = "$key is required!";
+        }
+        
+        elseif(empty($this->data['confirm_' . $key])){
+            $this->isValid = false;
+            $this->error = "confirm_$key is required!";
+        }
+
+        elseif($this->data[$key] !== $this->data['confirm_' . $key]){
+            $this->isValid = false;
+            $this->error = "$key doesn't match!";
         }
     }
 }
