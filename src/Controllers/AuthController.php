@@ -14,9 +14,9 @@ class AuthController
     /**
      * Get login page view
      *
-     * @return void
+     * @return mixed
      */
-    public function loginPage()
+    public function loginPage(): mixed
     {
         return Response::view('login');
     }
@@ -89,6 +89,8 @@ class AuthController
             flash_message('error', $validation->getMessage());
             return Response::redirect('/login');
         }
+
+        return true;
     }
 
     /**
@@ -102,13 +104,15 @@ class AuthController
         $validation = Validation::make($credentials, [
             'name' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirm'],
+            'password' => ['required', 'password', 'confirm'],
         ]);
 
         if ($validation->failed()) {
             flash_message('error', $validation->getMessage());
             return Response::redirect('/register');
         }
+
+        return true;
     }
 
     /**
@@ -127,6 +131,8 @@ class AuthController
         }
 
         Auth::login($user);
+
+        return true;
     }
 
     /**
@@ -147,5 +153,7 @@ class AuthController
             User::create($credentials);
             flash_message('success', 'Your account was created successfully!');
         }
+
+        return true;
     }
 }

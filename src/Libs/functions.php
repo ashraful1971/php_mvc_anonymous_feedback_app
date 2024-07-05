@@ -1,8 +1,15 @@
 <?php
 
 use App\Core\Auth;
+use App\Core\Model;
 
-function dd($data)
+/**
+ * Function to debug
+ *
+ * @param mixed $data
+ * @return void
+ */
+function dd($data): void
 {
   echo '<pre>';
   print_r($data);
@@ -10,22 +17,47 @@ function dd($data)
   exit;
 }
 
-function public_path($path)
+/**
+ * Get the public path
+ *
+ * @param string $path
+ * @return string
+ */
+function public_path($path): string
 {
   return PUBLIC_PATH . $path;
 }
 
-function component($path)
+/**
+ * Get the component file
+ *
+ * @param string $path
+ * @return void
+ */
+function component($path): void
 {
   require_once VIEW_PATH . '/components/' . $path . '.php';
 }
 
-function __($value)
+/**
+ * Print value
+ *
+ * @param $mixed $value
+ * @return void
+ */
+function __($value): void
 {
   echo $value;
 }
 
-function url($endpoint, $params = [])
+/**
+ * Get the url by endpoint
+ *
+ * @param string $endpoint
+ * @param array $params
+ * @return string
+ */
+function url($endpoint, $params = []): string
 {
   $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
   $baseUrl = strtok($baseUrl, "?");
@@ -44,11 +76,18 @@ function url($endpoint, $params = [])
   return rtrim($url, '/');
 }
 
-function flash_message($key, $value = null)
+/**
+ * Get and set flash message
+ *
+ * @param string $key
+ * @param mixed $value
+ * @return mixed
+ */
+function flash_message(string $key, mixed $value = null): mixed
 {
   if (isset($key) && isset($value)) {
     $_SESSION[$key] = $value;
-    return;
+    return true;
   }
 
   $value = isset($_SESSION[$key]) ? $_SESSION[$key] : null;
@@ -58,6 +97,11 @@ function flash_message($key, $value = null)
   return $value;
 }
 
+/**
+ * Generate unique ID
+ *
+ * @return string
+ */
 function generateUniqueId(): string
 {
   $prefix = substr(md5(uniqid(mt_rand(), true)), 0, 5);
@@ -65,12 +109,24 @@ function generateUniqueId(): string
   return $prefix . $suffix;
 }
 
-function redirect($url)
+/**
+ * Redirect to a url
+ *
+ * @param string $url
+ * @return void
+ */
+function redirect(string $url): void
 {
   header('Location: ' . url($url));
+  exit;
 }
 
-function authUser()
+/**
+ * Get the authenticated user
+ *
+ * @return Model|null
+ */
+function authUser(): Model|null
 {
   return Auth::user();
 }

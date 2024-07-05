@@ -10,6 +10,11 @@ class Application
     private RouteCollection $routes;
     private $request;
 
+    /**
+     * Initialize the application by creating the instance
+     *
+     * @return Application
+     */
     public static function init(): Application
     {
         if (!self::$app) {
@@ -19,20 +24,37 @@ class Application
         return self::$app;
     }
 
-    public function run(Request $request)
+    /**
+     * Run the application once everything is ready
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function run(Request $request): void
     {
         $this->request = $request;
-        return $this->handleRequest();
+        $this->handleRequest();
     }
 
-    public function withRoutes(RouteCollection $routes)
+    /**
+     * Includes the application routes
+     *
+     * @param RouteCollection $routes
+     * @return Application
+     */
+    public function withRoutes(RouteCollection $routes): Application
     {
         $this->routes = $routes;
 
         return $this;
     }
 
-    private function handleRequest()
+    /**
+     * Handle the incoming request
+     *
+     * @return void
+     */
+    private function handleRequest(): void
     {
         $method = $this->request->getMethod();
         $endpoint = $this->request->getRoutePath();
@@ -48,28 +70,47 @@ class Application
             $this->applyMiddlewares($middlewares);
         }
 
-        return $this->resolveAction($route->getAction());
+        $this->resolveAction($route->getAction());
     }
 
-    private function findRoute($method, $endpoint)
+    /**
+     * Find the route of the request
+     *
+     * @param string $method
+     * @param string $endpoint
+     * @return Route
+     */
+    private function findRoute(string $method, string $endpoint): Route
     {
         return $this->routes->find($method, $endpoint);
     }
     
-    private function applyMiddlewares($middlewares)
+    /**
+     * Apply specified middleware to the request
+     *
+     * @param array $middlewares
+     * @return void
+     */
+    private function applyMiddlewares(array $middlewares): void
     {
         foreach($middlewares as $middleware){
             $middleware::handle($this->request);
         }
     }
 
-    private function resolveAction($action)
+    /**
+     * Resolve the action
+     *
+     * @param callable|array $action
+     * @return void
+     */
+    private function resolveAction(callable|array $action): void
     {
         if (is_callable($action)) {
-            return $action($this->request);
+            $action($this->request);
         }
 
-        if (is_array($action)) {
+        elseif (is_array($action)) {
             $obj = new $action[0]();
             $obj->{$action[1]}($this->request);
         }

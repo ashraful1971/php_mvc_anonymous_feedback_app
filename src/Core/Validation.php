@@ -12,18 +12,36 @@ class Validation {
     private $data;
     private $options;
 
+    /**
+     * Constructor
+     *
+     * @param array $data
+     * @param array $options
+     */
     public function __construct(array $data, array $options)
     {
         $this->data = $data;
         $this->options = $options;
     }
 
-    public function failed()
+    /**
+     * Check if the validation has failed
+     *
+     * @return boolean
+     */
+    public function failed(): bool
     {
         return !$this->isValid;
     }
     
-    public static function make(array $data, array $options)
+    /**
+     * Make the validation and return the instance
+     *
+     * @param array $data
+     * @param array $options
+     * @return Validation
+     */
+    public static function make(array $data, array $options): self
     {
         self::$instance = new self($data, $options);
 
@@ -33,32 +51,55 @@ class Validation {
 
         return self::$instance;
     }
-    public function getMessage()
+
+    /**
+     * Get the error message
+     *
+     * @return string
+     */
+    public function getMessage(): string
     {
         return $this->error;
     }
     
-    public function validatedData()
+    /**
+     * Get the validated and sanitized data
+     *
+     * @return array
+     */
+    public function validatedData(): array
     {
         return $this->data;
     }
 
-    private function validate()
+    /**
+     * Run the valildation process
+     *
+     * @return boolean
+     */
+    private function validate(): bool
     {
         foreach($this->options as $key => $validationRules){
-            $value = $this->data[$key];
-
             foreach($validationRules as $rule){
                 $this->checkValidationRule($key, $rule);
 
                 if($this->failed()){
-                    return $this;
+                    return false;
                 }
             }
         }
+
+        return true;
     }
 
-    private function checkValidationRule(string $key, string $type)
+    /**
+     * Check a specific validation rule
+     *
+     * @param string $key
+     * @param string $type
+     * @return void
+     */
+    private function checkValidationRule(string $key, string $type): void
     {
         switch($type) {
             case 'required':
@@ -66,6 +107,9 @@ class Validation {
                 break;
             case 'email':
                 $this->isEmail($key);
+                break;
+            case 'password':
+                $this->isPassword($key);
                 break;
             case 'confirm':
                 $this->isConfirmed($key);
@@ -75,7 +119,12 @@ class Validation {
         }
     }
 
-    private function preprocessData()
+    /**
+     * Preprocess the data to avoid bugs
+     *
+     * @return void
+     */
+    private function preprocessData(): void
     {
         foreach($this->data as $key => $value){
             $this->data[$key] = trim($this->data[$key]);
@@ -83,7 +132,13 @@ class Validation {
         }
     }
 
-    private function isRequired(string $key)
+    /**
+     * Check if the field is required
+     *
+     * @param string $key
+     * @return void
+     */
+    private function isRequired(string $key): void
     {
         if(empty($this->data[$key])){
             $this->isValid = false;
@@ -91,7 +146,13 @@ class Validation {
         }
     }
 
-    private function isEmail(string $key)
+    /**
+     * Check if the email is valid
+     *
+     * @param string $key
+     * @return void
+     */
+    private function isEmail(string $key): void
     {
         if(!filter_var($this->data[$key], FILTER_VALIDATE_EMAIL)){
             $this->isValid = false;
@@ -99,7 +160,59 @@ class Validation {
         }
     }
     
-    private function isConfirmed(string $key)
+    /**
+     * Check if the pasword is good
+     *
+     * @param string $key
+     * @return void
+     */
+    private function isPassword(string $key): void
+    {
+        $password = $this->data[$key];
+
+        $minLength = 8;
+        $hasUppercase = preg_match("#[A-Z]+#", $password);
+        $hasLowercase = preg_match("#[a-z]+#", $password);
+        $hasNumber = preg_match("#[0-9]+#", $password);
+        $hasSpecialChar = preg_match("#\W+#", $password);
+
+        if(!(strlen($password) >= $minLength && $hasUppercase && $hasLowercase && $hasNumber && $hasSpecialChar)){
+            $this->isValid = false;
+        }
+
+        if(!(strlen($password) >= $minLength)){
+            $this->error = "$key should be at least $minLength characters long.";
+            return;
+        }
+
+        if(!$hasUppercase){
+            $this->error = "$key should contain uppercase letter.";
+            return;
+        }
+        
+        if(!$hasLowercase){
+            $this->error = "$key should contain lowercase letter.";
+            return;
+        }
+        
+        if(!$hasNumber){
+            $this->error = "$key should contain number.";
+            return;
+        }
+        
+        if(!$hasSpecialChar){
+            $this->error = "$key should contain special character.";
+            return;
+        }
+    }
+    
+    /**
+     * check if the field is confirmed
+     *
+     * @param string $key
+     * @return void
+     */
+    private function isConfirmed(string $key): void
     {
         if(empty($this->data[$key])){
             $this->isValid = false;
