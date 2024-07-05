@@ -104,7 +104,7 @@ class AuthController
         $validation = Validation::make($credentials, [
             'name' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'password', 'confirm'],
+            'password' => ['required', 'confirm', 'password'],
         ]);
 
         if ($validation->failed()) {

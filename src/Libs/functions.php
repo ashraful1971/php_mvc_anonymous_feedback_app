@@ -73,7 +73,7 @@ function url($endpoint, $params = []): string
     $url .= '?' . $queryString;
   }
 
-  return rtrim($url, '/');
+  return $url == '/' ? $url : rtrim($url, '/');
 }
 
 /**

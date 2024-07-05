@@ -78,10 +78,11 @@ class Application
      *
      * @param string $method
      * @param string $endpoint
-     * @return Route
+     * @return Route|null
      */
-    private function findRoute(string $method, string $endpoint): Route
+    private function findRoute(string $method, string $endpoint): Route|null
     {
+        // dd([$method, $endpoint]);
         return $this->routes->find($method, $endpoint);
     }
     

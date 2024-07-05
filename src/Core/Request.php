@@ -83,7 +83,7 @@ class Request {
     public function getRoutePath(): string
     {
         $path = parse_url(self::getURI())['path'];
-        return $path;
+        return $path == '/' ? $path : rtrim($path, '/');
     }
     
     /**
